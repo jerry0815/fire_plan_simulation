@@ -6,6 +6,7 @@ from src.report import (
     build_summary_table,
     plot_ending_balance,
     plot_success_rate,
+    plot_wr_success_rate,
     write_summary_csv,
 )
 
@@ -62,5 +63,24 @@ def test_plot_ending_balance_creates_nonempty_file(tmp_path):
     df = build_summary_table(_sample_all_results())
     out_path = tmp_path / "ending_balance.png"
     plot_ending_balance(df, str(out_path))
+    assert os.path.exists(out_path)
+    assert os.path.getsize(out_path) > 0
+
+
+def _sample_wr_results():
+    return pd.DataFrame([
+        {"scenario": "single_taipei", "withdrawal_rate": 0.03, "implied_initial_capital": 10_000_000,
+         "success_rate": 1.0, "median_ending_balance": 5_000_000, "p10_ending_balance": 1_000_000,
+         "avg_years_tier1_cut": 0.0, "avg_years_tier2_worked": 0.0},
+        {"scenario": "single_taipei", "withdrawal_rate": 0.05, "implied_initial_capital": 6_000_000,
+         "success_rate": 0.7, "median_ending_balance": 500_000, "p10_ending_balance": -100_000,
+         "avg_years_tier1_cut": 3.0, "avg_years_tier2_worked": 1.0},
+    ])
+
+
+def test_plot_wr_success_rate_creates_nonempty_file(tmp_path):
+    df = _sample_wr_results()
+    out_path = tmp_path / "wr_success_rate.png"
+    plot_wr_success_rate(df, str(out_path))
     assert os.path.exists(out_path)
     assert os.path.getsize(out_path) > 0

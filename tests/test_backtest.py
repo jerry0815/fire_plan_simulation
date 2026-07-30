@@ -7,6 +7,7 @@ from src.backtest import (
     aggregate_results,
     load_historical_data,
     run_rolling_backtest,
+    run_withdrawal_rate_sweep,
     wrapped_window,
 )
 from src.scenarios import Scenario
@@ -106,6 +107,38 @@ def test_run_rolling_backtest_marks_accumulation_depletion_as_failed():
     assert not trial_df["survived"].any()
     assert (trial_df["years_tier1_cut"] == 0).all()
     assert (trial_df["years_tier2_worked"] == 0).all()
+
+
+def test_run_withdrawal_rate_sweep_computes_implied_capital_and_success_rate():
+    historical_df = pd.DataFrame({
+        "Year": [2000, 2001, 2002, 2003, 2004],
+        "Global_Market_Return": [0.0, 0.0, 0.0, 0.0, 0.0],
+        "Inflation_Rate": [0.0, 0.0, 0.0, 0.0, 0.0],
+        "Cash_Yield": [0.0, 0.0, 0.0, 0.0, 0.0],
+    })
+    scenario = _make_flat_scenario(annual_cost=300_000, current_capital=0, monthly_work_income=0)
+    engine_params = {
+        "cash_tent_size_years": 3,
+        "tier_1_wr_threshold": 0.048,
+        "tier_2_wr_threshold": 0.070,
+        "budget_cut_percentage": 0.10,
+        "barista_annual_income": 240_000,
+    }
+
+    wr_df = run_withdrawal_rate_sweep(
+        scenario, [0.03, 0.10], historical_df, horizon_years=2, engine_params=engine_params
+    )
+
+    assert list(wr_df["withdrawal_rate"]) == [0.03, 0.10]
+    assert round(wr_df.iloc[0]["implied_initial_capital"]) == 10_000_000
+    assert round(wr_df.iloc[1]["implied_initial_capital"]) == 3_000_000
+    # 3% withdrawal rate on a flat 0%-return world always stays in the safe guardrail state
+    assert wr_df.iloc[0]["success_rate"] == 1.0
+    assert set(wr_df.columns) == {
+        "withdrawal_rate", "implied_initial_capital", "success_rate",
+        "median_ending_balance", "p10_ending_balance",
+        "avg_years_tier1_cut", "avg_years_tier2_worked",
+    }
 
 
 def test_aggregate_results_computes_expected_stats():

@@ -1,3 +1,5 @@
+import dataclasses
+
 import pandas as pd
 
 from src.accumulation import run_accumulation
@@ -73,6 +75,27 @@ def run_rolling_backtest(scenario, years_worked, historical_df, horizon_years, e
         })
 
     return pd.DataFrame(trials)
+
+
+def run_withdrawal_rate_sweep(
+    scenario,
+    withdrawal_rates: list[float],
+    historical_df: pd.DataFrame,
+    horizon_years: int,
+    engine_params: dict,
+) -> pd.DataFrame:
+    rows = []
+    for wr in withdrawal_rates:
+        implied_capital = scenario.annual_cost / wr
+        wr_scenario = dataclasses.replace(scenario, current_capital=implied_capital)
+        trial_df = run_rolling_backtest(wr_scenario, 0, historical_df, horizon_years, engine_params)
+        agg = aggregate_results(trial_df)
+        rows.append({
+            "withdrawal_rate": wr,
+            "implied_initial_capital": implied_capital,
+            **agg,
+        })
+    return pd.DataFrame(rows)
 
 
 def aggregate_results(trial_df: pd.DataFrame) -> dict:
