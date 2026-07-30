@@ -8,6 +8,8 @@ from src.backtest import (
     load_historical_data,
     run_rolling_backtest,
     run_withdrawal_rate_sweep,
+    run_wr_years_worked_grid,
+    safe_withdrawal_rate_table,
     wrapped_window,
 )
 from src.scenarios import Scenario
@@ -161,3 +163,48 @@ def test_aggregate_results_computes_expected_stats():
     assert agg["median_ending_balance"] == 150.0
     assert agg["avg_years_tier1_cut"] == 0.75
     assert agg["avg_years_tier2_worked"] == 0.25
+
+
+def test_run_wr_years_worked_grid_adds_years_worked_dimension():
+    historical_df = pd.DataFrame({
+        "Year": [2000, 2001, 2002, 2003, 2004],
+        "Global_Market_Return": [0.05, 0.05, 0.05, 0.05, 0.05],
+        "Inflation_Rate": [0.0, 0.0, 0.0, 0.0, 0.0],
+        "Cash_Yield": [0.01, 0.01, 0.01, 0.01, 0.01],
+    })
+    scenario = _make_flat_scenario(annual_cost=300_000, current_capital=0, monthly_work_income=40_000)
+    engine_params = {
+        "cash_tent_size_years": 3,
+        "tier_1_wr_threshold": 0.048,
+        "tier_2_wr_threshold": 0.070,
+        "budget_cut_percentage": 0.10,
+        "barista_annual_income": 240_000,
+    }
+
+    grid_df = run_wr_years_worked_grid(
+        scenario, [0.05], [0, 1], historical_df, horizon_years=2, engine_params=engine_params
+    )
+
+    assert list(grid_df["years_worked"]) == [0, 1]
+    assert list(grid_df["withdrawal_rate"]) == [0.05, 0.05]
+    assert round(grid_df.iloc[0]["implied_initial_capital"]) == 6_000_000  # 300,000 / 0.05
+    # working one more year (positive savings, positive returns) can only ever help or match
+    assert grid_df.iloc[1]["success_rate"] >= grid_df.iloc[0]["success_rate"]
+
+
+def test_safe_withdrawal_rate_table_returns_max_safe_rate_or_nan():
+    grid_df = pd.DataFrame({
+        "scenario": ["a", "a", "a", "b", "b"],
+        "years_worked": [0, 0, 1, 0, 0],
+        "withdrawal_rate": [0.03, 0.05, 0.03, 0.03, 0.05],
+        "success_rate": [1.00, 0.50, 1.00, 0.80, 0.95],
+    })
+
+    safe_df = safe_withdrawal_rate_table(grid_df, threshold=0.95, success_column="success_rate")
+
+    row_a0 = safe_df[(safe_df["scenario"] == "a") & (safe_df["years_worked"] == 0)].iloc[0]
+    assert row_a0["safe_withdrawal_rate"] == 0.03
+    row_a1 = safe_df[(safe_df["scenario"] == "a") & (safe_df["years_worked"] == 1)].iloc[0]
+    assert row_a1["safe_withdrawal_rate"] == 0.03
+    row_b0 = safe_df[(safe_df["scenario"] == "b") & (safe_df["years_worked"] == 0)].iloc[0]
+    assert row_b0["safe_withdrawal_rate"] == 0.05

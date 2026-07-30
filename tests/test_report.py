@@ -5,6 +5,7 @@ import pandas as pd
 from src.report import (
     build_summary_table,
     plot_ending_balance,
+    plot_safe_wr_vs_years_worked,
     plot_success_rate,
     plot_wr_success_rate,
     write_summary_csv,
@@ -82,5 +83,17 @@ def test_plot_wr_success_rate_creates_nonempty_file(tmp_path):
     df = _sample_wr_results()
     out_path = tmp_path / "wr_success_rate.png"
     plot_wr_success_rate(df, str(out_path))
+    assert os.path.exists(out_path)
+    assert os.path.getsize(out_path) > 0
+
+
+def test_plot_safe_wr_vs_years_worked_creates_nonempty_file(tmp_path):
+    df = pd.DataFrame({
+        "scenario": ["single_taipei", "single_taipei", "single_taipei"],
+        "years_worked": [0, 1, 2],
+        "safe_withdrawal_rate": [0.030, 0.033, 0.036],
+    })
+    out_path = tmp_path / "safe_wr_vs_years_worked.png"
+    plot_safe_wr_vs_years_worked(df, str(out_path), title="test")
     assert os.path.exists(out_path)
     assert os.path.getsize(out_path) > 0

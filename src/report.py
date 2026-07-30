@@ -55,6 +55,20 @@ def plot_wr_success_rate(
     plt.close(fig)
 
 
+def plot_safe_wr_vs_years_worked(safe_df: pd.DataFrame, path: str, title: str) -> None:
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for scenario_name, group in safe_df.groupby("scenario"):
+        group = group.sort_values("years_worked")
+        ax.plot(group["years_worked"], group["safe_withdrawal_rate"] * 100, marker="o", label=scenario_name)
+    ax.set_xlabel("Years Worked Before FIRE")
+    ax.set_ylabel("Safe Withdrawal Rate (%)")
+    ax.set_title(title)
+    ax.legend(fontsize=8)
+    ax.grid(True, alpha=0.3)
+    fig.savefig(path)
+    plt.close(fig)
+
+
 def plot_ending_balance(summary_df: pd.DataFrame, path: str) -> None:
     fig, ax = plt.subplots(figsize=(8, 5))
     for scenario_name, group in summary_df.groupby("scenario"):

@@ -98,6 +98,47 @@ def run_withdrawal_rate_sweep(
     return pd.DataFrame(rows)
 
 
+def run_wr_years_worked_grid(
+    scenario,
+    withdrawal_rates: list[float],
+    years_worked_range: list[int],
+    historical_df: pd.DataFrame,
+    horizon_years: int,
+    engine_params: dict,
+) -> pd.DataFrame:
+    rows = []
+    for years_worked in years_worked_range:
+        for wr in withdrawal_rates:
+            implied_capital = scenario.annual_cost / wr
+            wr_scenario = dataclasses.replace(scenario, current_capital=implied_capital)
+            trial_df = run_rolling_backtest(wr_scenario, years_worked, historical_df, horizon_years, engine_params)
+            agg = aggregate_results(trial_df)
+            rows.append({
+                "years_worked": years_worked,
+                "withdrawal_rate": wr,
+                "implied_initial_capital": implied_capital,
+                **agg,
+            })
+    return pd.DataFrame(rows)
+
+
+def safe_withdrawal_rate_table(grid_df: pd.DataFrame, threshold: float, success_column: str) -> pd.DataFrame:
+    rows = []
+    for (scenario_name, years_worked), group in grid_df.groupby(["scenario", "years_worked"]):
+        safe = group[group[success_column] >= threshold]
+        safe_wr = safe["withdrawal_rate"].max() if not safe.empty else float("nan")
+        rows.append({
+            "scenario": scenario_name,
+            "years_worked": years_worked,
+            "safe_withdrawal_rate": safe_wr,
+        })
+    return (
+        pd.DataFrame(rows)
+        .sort_values(["scenario", "years_worked"])
+        .reset_index(drop=True)
+    )
+
+
 def aggregate_results(trial_df: pd.DataFrame) -> dict:
     comfortable = trial_df["survived"] & (trial_df["years_tier2_worked"] == 0)
     no_cut = trial_df["survived"] & (trial_df["years_tier1_cut"] == 0)
