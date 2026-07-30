@@ -14,8 +14,8 @@ single_taipei:
 
 single_taichung:
   monthly_costs_ntd:
-    rent: 9000
-    food: 8000
+    rent: 10400
+    food: 10700
     utilities: 1700
     transport: 1000
     health_insurance: 1000
@@ -28,8 +28,8 @@ single_taichung:
 
 couple_taipei:
   monthly_costs_ntd:
-    rent: 18000
-    food: 16000
+    rent: 20800
+    food: 21300
     utilities: 2500
     transport: 2200
     health_insurance: 2000
@@ -42,8 +42,8 @@ couple_taipei:
 
 couple_taichung:
   monthly_costs_ntd:
-    rent: 12000
-    food: 14000
+    rent: 13800
+    food: 18700
     utilities: 2300
     transport: 1800
     health_insurance: 2000
