@@ -139,11 +139,16 @@ def safe_withdrawal_rate_table(grid_df: pd.DataFrame, threshold: float, success_
     )
 
 
+CAPPED_WORK_YEARS_LIMIT = 5
+
+
 def aggregate_results(trial_df: pd.DataFrame) -> dict:
+    capped_work = trial_df["survived"] & (trial_df["years_tier2_worked"] < CAPPED_WORK_YEARS_LIMIT)
     comfortable = trial_df["survived"] & (trial_df["years_tier2_worked"] == 0)
     no_cut = trial_df["survived"] & (trial_df["years_tier1_cut"] == 0)
     return {
         "success_rate": trial_df["survived"].mean(),
+        "capped_work_success_rate": capped_work.mean(),
         "comfortable_success_rate": comfortable.mean(),
         "no_cut_success_rate": no_cut.mean(),
         "median_ending_balance": trial_df["ending_balance"].median(),

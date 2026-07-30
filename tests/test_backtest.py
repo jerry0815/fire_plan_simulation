@@ -136,13 +136,16 @@ def test_run_withdrawal_rate_sweep_computes_implied_capital_and_success_rate():
     assert round(wr_df.iloc[1]["implied_initial_capital"]) == 3_000_000
     # 3% withdrawal rate on a flat 0%-return world always stays in the safe guardrail state
     assert wr_df.iloc[0]["success_rate"] == 1.0
+    assert wr_df.iloc[0]["capped_work_success_rate"] == 1.0
     assert wr_df.iloc[0]["comfortable_success_rate"] == 1.0
     assert wr_df.iloc[0]["no_cut_success_rate"] == 1.0
-    # 10% withdrawal rate always triggers tier2 (cut + work) every year -> never a "no_cut" success
+    # 10% withdrawal rate always triggers tier2 (cut + work) every year -> never a "no_cut" success,
+    # and with horizon_years=2 both years hit tier2, so it also clears the <5-years-worked cap easily
     assert wr_df.iloc[1]["no_cut_success_rate"] == 0.0
+    assert wr_df.iloc[1]["capped_work_success_rate"] == 1.0
     assert set(wr_df.columns) == {
         "withdrawal_rate", "implied_initial_capital", "success_rate",
-        "comfortable_success_rate", "no_cut_success_rate",
+        "capped_work_success_rate", "comfortable_success_rate", "no_cut_success_rate",
         "median_ending_balance", "p10_ending_balance",
         "avg_years_tier1_cut", "avg_years_tier2_worked",
     }
@@ -158,11 +161,24 @@ def test_aggregate_results_computes_expected_stats():
     })
     agg = aggregate_results(trial_df)
     assert agg["success_rate"] == 0.75
+    assert agg["capped_work_success_rate"] == 0.75  # none of the survived trials hit the 5-year cap
     assert agg["comfortable_success_rate"] == 0.5
     assert agg["no_cut_success_rate"] == 0.25
     assert agg["median_ending_balance"] == 150.0
     assert agg["avg_years_tier1_cut"] == 0.75
     assert agg["avg_years_tier2_worked"] == 0.25
+
+
+def test_aggregate_results_capped_work_excludes_trials_at_or_over_the_limit():
+    trial_df = pd.DataFrame({
+        "start_year": [2000, 2001, 2002],
+        "survived": [True, True, True],
+        "ending_balance": [100, 200, 300],
+        "years_tier1_cut": [4, 5, 10],
+        "years_tier2_worked": [4, 5, 10],  # under, at, and over the 5-year cap
+    })
+    agg = aggregate_results(trial_df)
+    assert agg["capped_work_success_rate"] == pytest.approx(1 / 3)
 
 
 def test_run_wr_years_worked_grid_adds_years_worked_dimension():

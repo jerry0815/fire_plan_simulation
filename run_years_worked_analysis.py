@@ -22,6 +22,8 @@ SUCCESS_THRESHOLD = 0.95
 SUCCESS_TIERS = [
     ("success_rate", "safe_wr_vs_years_worked_bare_survival",
      "bare survival", "Safe Withdrawal Rate vs. Years Worked (balance > 0 at year 40)"),
+    ("capped_work_success_rate", "safe_wr_vs_years_worked_capped_work",
+     "< 5 years of work", "Safe Withdrawal Rate vs. Years Worked (fewer than 5 years of forced work)"),
     ("comfortable_success_rate", "safe_wr_vs_years_worked_comfortable",
      "no forced work", "Safe Withdrawal Rate vs. Years Worked (never forced back to work)"),
     ("no_cut_success_rate", "safe_wr_vs_years_worked_no_cut",
