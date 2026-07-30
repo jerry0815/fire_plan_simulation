@@ -99,8 +99,12 @@ def run_withdrawal_rate_sweep(
 
 
 def aggregate_results(trial_df: pd.DataFrame) -> dict:
+    comfortable = trial_df["survived"] & (trial_df["years_tier2_worked"] == 0)
+    no_cut = trial_df["survived"] & (trial_df["years_tier1_cut"] == 0)
     return {
         "success_rate": trial_df["survived"].mean(),
+        "comfortable_success_rate": comfortable.mean(),
+        "no_cut_success_rate": no_cut.mean(),
         "median_ending_balance": trial_df["ending_balance"].median(),
         "p10_ending_balance": trial_df["ending_balance"].quantile(0.10),
         "avg_years_tier1_cut": trial_df["years_tier1_cut"].mean(),

@@ -35,15 +35,20 @@ def plot_success_rate(summary_df: pd.DataFrame, path: str) -> None:
     plt.close(fig)
 
 
-def plot_wr_success_rate(summary_df: pd.DataFrame, path: str) -> None:
+def plot_wr_success_rate(
+    summary_df: pd.DataFrame,
+    path: str,
+    success_column: str = "success_rate",
+    title: str = "Retirement Success Rate vs. Withdrawal Rate",
+) -> None:
     fig, ax = plt.subplots(figsize=(8, 5))
     for scenario_name, group in summary_df.groupby("scenario"):
         group = group.sort_values("withdrawal_rate")
-        ax.plot(group["withdrawal_rate"] * 100, group["success_rate"] * 100, marker="o", label=scenario_name)
+        ax.plot(group["withdrawal_rate"] * 100, group[success_column] * 100, marker="o", label=scenario_name)
     ax.axhline(95, color="gray", linestyle=":", linewidth=1, label="95% success")
     ax.set_xlabel("Nominal Starting Withdrawal Rate (%)")
     ax.set_ylabel("Success Rate (%)")
-    ax.set_title("Retirement Success Rate vs. Withdrawal Rate")
+    ax.set_title(title)
     ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3)
     fig.savefig(path)

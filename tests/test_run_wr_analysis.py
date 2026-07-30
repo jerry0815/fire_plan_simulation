@@ -21,7 +21,14 @@ def test_main_produces_wr_summary_and_output_files(tmp_path, monkeypatch):
         "single_taipei", "single_taichung", "couple_taipei", "couple_taichung",
     }
     assert summary_df["success_rate"].between(0, 1).all()
+    assert summary_df["comfortable_success_rate"].between(0, 1).all()
+    assert summary_df["no_cut_success_rate"].between(0, 1).all()
+    # stricter tiers can never exceed the looser ones they're nested inside
+    assert (summary_df["comfortable_success_rate"] <= summary_df["success_rate"]).all()
+    assert (summary_df["no_cut_success_rate"] <= summary_df["comfortable_success_rate"]).all()
     assert (summary_df["implied_initial_capital"] > 0).all()
 
     assert os.path.exists(tmp_path / "output" / "wr_summary.csv")
     assert os.path.exists(tmp_path / "output" / "wr_success_rate_chart.png")
+    assert os.path.exists(tmp_path / "output" / "wr_comfortable_success_rate_chart.png")
+    assert os.path.exists(tmp_path / "output" / "wr_no_cut_success_rate_chart.png")
