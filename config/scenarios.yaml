@@ -1,7 +1,7 @@
 single_taipei:
   monthly_costs_ntd:
-    rent: 13000
-    food: 9000
+    rent: 15000
+    food: 12000
     utilities: 1800
     transport: 1200
     health_insurance: 1000
