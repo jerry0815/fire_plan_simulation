@@ -1,11 +1,10 @@
 single_taipei:
   monthly_costs_ntd:
-    rent: 18000
-    food: 12000
-    utilities: 3000
-    transport: 2000
-    health_insurance: 2000
-    misc: 8000
+    rent: 15000
+    food: 25000
+    transport: 2500
+    health_insurance: 5000
+    misc: 8333
   placeholders:
     current_capital_ntd: 0        # EDIT ME
     current_age: 35               # EDIT ME
@@ -14,11 +13,10 @@ single_taipei:
 single_taichung:
   monthly_costs_ntd:
     rent: 10000
-    food: 9000
-    utilities: 2500
-    transport: 1500
-    health_insurance: 2000
-    misc: 5000
+    food: 20000
+    transport: 1250
+    health_insurance: 5000
+    misc: 6667
   placeholders:
     current_capital_ntd: 0        # EDIT ME
     current_age: 35               # EDIT ME
@@ -26,12 +24,11 @@ single_taichung:
 
 couple_taipei:
   monthly_costs_ntd:
-    rent: 28000
-    food: 20000
-    utilities: 5000
-    transport: 4000
-    health_insurance: 4000
-    misc: 14000
+    rent: 25000
+    food: 50000
+    transport: 5000
+    health_insurance: 10000
+    misc: 15000
   placeholders:
     current_capital_ntd: 0        # EDIT ME
     current_age: 35               # EDIT ME
@@ -39,12 +36,11 @@ couple_taipei:
 
 couple_taichung:
   monthly_costs_ntd:
-    rent: 15000
-    food: 16000
-    utilities: 4000
-    transport: 3000
-    health_insurance: 4000
-    misc: 8000
+    rent: 18000
+    food: 40000
+    transport: 2500
+    health_insurance: 10000
+    misc: 12500
   placeholders:
     current_capital_ntd: 0        # EDIT ME
     current_age: 35               # EDIT ME

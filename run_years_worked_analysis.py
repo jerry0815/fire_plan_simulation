@@ -10,7 +10,7 @@ ENGINE_PARAMS = {
     "cash_tent_size_years": 3,
     "tier_1_wr_threshold": 0.048,
     "tier_2_wr_threshold": 0.070,
-    "budget_cut_percentage": 0.10,
+    "budget_cut_percentage": 0.30,
     "barista_annual_income": 240_000,
 }
 HORIZON_YEARS = 40
